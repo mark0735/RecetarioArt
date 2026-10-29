@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetario de Materiales Sostenibles - ODS 12 | Programación para Artistas I</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f7ff;
+            --panel-bg: #ffffff;
+            --accent-color: #7eb8da;
+            --accent-soft: #a8d4f0;
+            --accent-hover: #5a9fc9;
+            --accent-dark: #3d7ea6;
+            --text-main: #2c3e50;
+            --text-muted: #6b7c8a;
+            --border-color: #d4e6f5;
+            --shadow-soft: 0 4px 20px rgba(126, 184, 218, 0.15);
+            --shadow-hover: 0 8px 28px rgba(126, 184, 218, 0.25);
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            line-height: 1.55;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background: linear-gradient(135deg, #e8f4fc 0%, #d6ebf8 100%);
+            padding: 28px 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow-soft);
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-dark);
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .badge-ods {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-soft));
+            color: #1a3a4a;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 12px;
+            letter-spacing: 0.01em;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr) 320px;
+            gap: 22px;
+            padding: 24px;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Diseño responsivo: tablet */
+        @media (max-width: 1100px) {
+            main {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                max-width: 1000px;
+                padding: 20px;
+                gap: 18px;
+            }
+            .canvas-container { grid-column: 1 / -1; grid-row: 1; }
+            .panel { padding: 20px; }
+        }
+
+        /* Diseño responsivo: móvil */
+        @media (max-width: 640px) {
+            header { padding: 24px 16px; }
+            header h1 { font-size: clamp(1.35rem, 6vw, 1.75rem); line-height: 1.2; }
+            header p { font-size: .85rem; }
+            .badge-ods { font-size: .72rem; padding: 6px 11px; line-height: 1.35; }
+            main { grid-template-columns: minmax(0, 1fr); padding: 12px; gap: 14px; }
+            .canvas-container { grid-column: auto; grid-row: auto; }
+            .panel { padding: 16px; gap: 15px; border-radius: 14px; }
+            .panel h2 { font-size: 1rem; }
+            #recipe-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+            .recipe-card { padding: 11px; min-width: 0; }
+            .recipe-card h3 { font-size: .85rem; line-height: 1.35; }
+            .recipe-card p { font-size: .74rem; }
+            .canvas-toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+            .btn { min-height: 44px; padding: 11px 10px; font-size: .82rem; }
+            footer { padding: 16px 12px; font-size: .75rem; }
+        }
+
+        @media (max-width: 360px) {
+            #recipe-list { grid-template-columns: 1fr; }
+            .canvas-toolbar { grid-template-columns: 1fr; }
+        }
+
+        .btn-save { background: linear-gradient(135deg, #9bc9a6, #c5e5c8); }
+        .btn-save:hover { background: linear-gradient(135deg, #6eaa7c, #9bc9a6); }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: var(--shadow-soft);
+            transition: box-shadow 0.25s ease;
+            min-width: 0;
+        }
+
+        .panel:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .panel h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--accent-dark);
+            border-bottom: 2px solid var(--accent-soft);
+            padding-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        label output {
+            color: var(--accent-dark);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        select,
+        input[type="range"] {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #f7fbfe;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        select:focus,
+        input[type="range"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(126, 184, 218, 0.25);
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #d6ebf8;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: var(--accent-hover);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .recipe-card {
+            background-color: #f7fbfe;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.22s ease;
+        }
+
+        .recipe-card:hover {
+            border-color: var(--accent-color);
+            background-color: #eef6fc;
+            transform: translateY(-1px);
+        }
+
+        .recipe-card.selected {
+            border-color: var(--accent-color);
+            background: linear-gradient(135deg, #e8f4fc, #f0f9ff);
+            box-shadow: 0 0 0 3px rgba(126, 184, 218, 0.2);
+        }
+
+        .recipe-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .recipe-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            gap: 16px;
+        }
+
+        .canvas-container h2 {
+            align-self: stretch;
+        }
+
+        /* El tamaño visual lo define el CSS; la resolución interna la ajusta JS con devicePixelRatio */
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            aspect-ratio: 5 / 4;
+            align-self: center;
+            background-color: #f7f4ea;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-soft);
+            cursor: crosshair;
+            touch-action: none;            /* evita scroll/zoom accidental al dibujar con el dedo */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .canvas-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1 1 140px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-soft));
+            color: #1a3a4a;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.22s ease;
+            box-shadow: 0 2px 8px rgba(126, 184, 218, 0.3);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, var(--accent-hover), var(--accent-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(126, 184, 218, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .info-section {
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-box {
+            background-color: #f7fbfe;
+            padding: 14px;
+            border-left: 4px solid var(--accent-color);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .info-box h4 {
+            color: var(--accent-dark);
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .info-box p {
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .references-section {
+            max-width: 1400px;
+            margin: 0 auto 24px auto;
+            width: calc(100% - 48px);
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        @media (max-width: 640px) {
+            .references-section { width: calc(100% - 24px); padding: 16px; }
+        }
+
+        .references-section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-dark);
+            border-bottom: 2px solid var(--accent-soft);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+
+        .references-list {
+            list-style-type: disc;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .references-list li a {
+            color: var(--accent-dark);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .references-list li a:hover {
+            text-decoration: underline;
+            color: var(--accent-hover);
+        }
+
+        footer {
+            text-align: center;
+            padding: 18px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #e8f4fc 0%, #d6ebf8 100%);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Recetario de Materiales Sostenibles</h1>
+        <p>Programación para Artistas I — Licenciatura en Artes Plásticas</p>
+        <span class="badge-ods">ODS 12: Producción y Consumo Responsables</span>
+    </header>
+
+    <main>
+        <!-- PANEL IZQUIERDO -->
+        <section class="panel">
+            <h2>Catálogo de Insumos</h2>
+            <div id="recipe-list" class="control-group">
+                <!-- Se poblará dinámicamente -->
+            </div>
+
+            <h2>Parámetros de Mezcla</h2>
+            <div class="control-group">
+                <label for="slider-ratio">Proporción de Agua / Aglutinante: <output id="out-ratio">1.0</output></label>
+                <input type="range" id="slider-ratio" min="0.1" max="2.0" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label for="slider-density">Densidad del Trazo / Complejidad: <output id="out-density">50</output></label>
+                <input type="range" id="slider-density" min="10" max="100" step="5" value="50">
+            </div>
+        </section>
+
+        <!-- PANEL CENTRAL -->
+        <section class="panel canvas-container">
+            <h2>Lienzo de Pruebas Cromáticas</h2>
+            <canvas id="artCanvas" width="500" height="400" aria-label="Lienzo para experimentar con pigmentos sostenibles" role="img"></canvas>
+
+            <div class="canvas-toolbar">
+                <button id="btn-clear" class="btn">Limpiar Lienzo</button>
+                <button id="btn-pattern" class="btn">Generar Patrón Fractal</button>
+                <button id="btn-save" class="btn btn-save">Guardar PNG</button>
+            </div>
+        </section>
+
+        <!-- PANEL DERECHO -->
+        <section class="panel">
+            <h2>Ficha del Material</h2>
+            <div id="material-info" class="info-section">
+                <!-- Información del material seleccionado -->
+            </div>
+        </section>
+    </main>
+
+    <section class="references-section">
+        <h2>Referencias y Fuentes Documentales</h2>
+        <ul class="references-list">
+            <li>
+                Organización de las Naciones Unidas (ONU). <em>Objetivo 12: Garantizar modalidades de consumo y producción sostenibles</em>.
+                Disponible en: <a href="https://www.un.org/sustainabledevelopment/es/sustainable-consumption-production/" target="_blank" rel="noopener">ONU - ODS 12</a>
+            </li>
+            <li>
+                Shiffman, D. (2012). <em>The Nature of Code: Simulating Natural Systems with Processing/JavaScript</em>.
+                Algoritmos de ramificación y sistemas orgánicos aplicados al diseño computacional.
+                Disponible en: <a href="https://natureofcode.com/" target="_blank" rel="noopener">The Nature of Code</a>
+            </li>
+            <li>
+                Cervantes, J. et al. (2020). <em>Pigmentos naturales tradicionales en Mesoamérica y su rescate ecológico</em>.
+                Estudio sobre grana cochinilla, añil y cempasúchil en la plástica contemporánea.
+                Disponible en: <a href="https://www.scielo.org.mx" target="_blank" rel="noopener">SciELO México</a>
+            </li>
+            <li>
+                MDN Web Docs (2026). <em>Canvas API: Guía de referencia y manipulación de gráficos 2D en JavaScript</em>.
+                Mozilla Developer Network.
+                Disponible en: <a href="https://developer.mozilla.org/es/docs/Web/API/Canvas_API" target="_blank" rel="noopener">MDN Canvas API</a>
+            </li>
+        </ul>
+    </section>
+
+    <footer>
+        <p>Materia: Programación para Artistas I | Enfoque ODS Agenda 2030</p>
+    </footer>
+
+    <script>
+        /**
+         * PROGRAMACIÓN PARA ARTISTAS I
+         * Recetario de Materiales Sostenibles — v2
+         * Estructuras de datos (objetos y arreglos), canvas HD, trazo continuo
+         * y ramificación recursiva estocástica inspirada en The Nature of Code.
+         */
+
+        // ------------------------------------------------------------------
+        // 1. DATOS
+        // ------------------------------------------------------------------
+        const recetasSostenibles = [
+            {
+                id: "cochinilla",
+                nombre: "Tinta de Grana Cochinilla",
+                origen: "Bio-pigmento de insecto parásito del nopal (Dactylopius coccus)",
+                biodegradabilidad: "100% Orgánico",
+                impactoODS: "Sustituye colorantes sintéticos basados en petróleo. Cero huella plástica.",
+                colorHEX: "#a31d36",
+                colorRGB: { r: 163, g: 29, b: 54 },
+                aglutinante: "Goma Arábiga"
+            },
+            {
+                id: "anil",
+                nombre: "Añil / Indigo Botánico",
+                origen: "Extracción vegetal de hojas de Indigofera suffruticosa",
+                biodegradabilidad: "100% Orgánico",
+                impactoODS: "Producción limpia, libre de efluentes químicos nocivos para mantos freáticos.",
+                colorHEX: "#1b365d",
+                colorRGB: { r: 27, g: 54, b: 93 },
+                aglutinante: "Agua de cal y alumbre"
+            },
+            {
+                id: "cempasuchil",
+                nombre: "Amarillo Cempasúchil",
+                origen: "Extracto de flor de Tagetes erecta (carotenoides natural)",
+                biodegradabilidad: "100% Biodegradable",
+                impactoODS: "Aprovechamiento de biomasa vegetal agrícola de temporada.",
+                colorHEX: "#e89216",
+                colorRGB: { r: 232, g: 146, b: 22 },
+                aglutinante: "Cera de abeja / Aglutinante al huevo"
+            },
+            {
+                id: "nogal",
+                nombre: "Nogalina (Marrón Orgánico)",
+                origen: "Maceración de la cáscara verde del fruto del nogal (Juglans regia)",
+                biodegradabilidad: "100% Orgánico",
+                impactoODS: "Reutilización de subproductos agrícolas desaprovechados.",
+                colorHEX: "#4a2e18",
+                colorRGB: { r: 74, g: 46, b: 24 },
+                aglutinante: "Agua destilada"
+            },
+            {
+                id: "curcuma",
+                nombre: "Cúrcuma (Amarillo Dorado)",
+                origen: "Rizoma pulverizado de Curcuma longa (curcumina natural)",
+                biodegradabilidad: "100% Biodegradable",
+                impactoODS: "Alternativa vegetal a pigmentos sintéticos azoicos. Cultivo de bajo impacto hídrico.",
+                colorHEX: "#e6a817",
+                colorRGB: { r: 230, g: 168, b: 23 },
+                aglutinante: "Goma arábiga o clara de huevo"
+            },
+            {
+                id: "achiote",
+                nombre: "Achiote / Annatto",
+                origen: "Semillas de Bixa orellana (bixina y norbixina naturales)",
+                biodegradabilidad: "100% Orgánico",
+                impactoODS: "Sustituye colorantes artificiales rojo-naranja. Producción tradicional mesoamericana sostenible.",
+                colorHEX: "#c45c26",
+                colorRGB: { r: 196, g: 92, b: 38 },
+                aglutinante: "Aceite vegetal o agua"
+            },
+            {
+                id: "carbon",
+                nombre: "Carbón Vegetal (Negro Sostenible)",
+                origen: "Carbonización controlada de residuos de madera o bambú",
+                biodegradabilidad: "100% Orgánico / Biodegradable",
+                impactoODS: "Reutiliza biomasa residual. Alternativa ecológica a negros de humo derivados del petróleo.",
+                colorHEX: "#1a1a1a",
+                colorRGB: { r: 26, g: 26, b: 26 },
+                aglutinante: "Goma arábiga o aglutinante acrílico natural"
+            }
+        ];
+
+        // ------------------------------------------------------------------
+        // 2. ESTADO Y REFERENCIAS AL DOM
+        // ------------------------------------------------------------------
+        const COLOR_PAPEL = '#f7f4ea';
+
+        let materialActual = recetasSostenibles[0];
+        let dibujoActivo = false;
+        let puntosTrazo = [];          // puntos del trazo en curso (coordenadas lógicas)
+        let anchoLogico = 500;         // tamaño del canvas en píxeles CSS
+        let altoLogico = 400;
+
+        const canvas = document.getElementById('artCanvas');
+        const ctx = canvas.getContext('2d');
+        const instantanea = document.createElement('canvas');   // copia del lienzo al iniciar un trazo
+        const ctxInstantanea = instantanea.getContext('2d');
+
+        const containerRecetas = document.getElementById('recipe-list');
+        const containerInfo = document.getElementById('material-info');
+        const sliderRatio = document.getElementById('slider-ratio');
+        const sliderDensity = document.getElementById('slider-density');
+        const outRatio = document.getElementById('out-ratio');
+        const outDensity = document.getElementById('out-density');
+        const btnSave = document.getElementById('btn-save');
+        const btnClear = document.getElementById('btn-clear');
+        const btnPattern = document.getElementById('btn-pattern');
+
+        // ------------------------------------------------------------------
+        // 3. UTILIDADES
+        // ------------------------------------------------------------------
+        const limitar = (v, min, max) => Math.min(Math.max(v, min), max);
+        const aleatorio = (min, max) => min + Math.random() * (max - min);
+        const rgba = ({ r, g, b }, a) => `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
+
+        function leerParametros() {
+            return {
+                ratio: parseFloat(sliderRatio.value),
+                densidad: parseInt(sliderDensity.value, 10)
+            };
+        }
+
+        // ------------------------------------------------------------------
+        // 4. CANVAS DE ALTA RESOLUCIÓN (devicePixelRatio)
+        // ------------------------------------------------------------------
+        function ajustarCanvasHD() {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            if (!w || !h) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            const nuevoAncho = Math.round(w * dpr);
+            const nuevoAlto = Math.round(h * dpr);
+            if (canvas.width === nuevoAncho && canvas.height === nuevoAlto) return;
+
+            // Conservar lo ya pintado antes de que el redimensionado borre el canvas
+            const copia = document.createElement('canvas');
+            copia.width = canvas.width;
+            copia.height = canvas.height;
+            copia.getContext('2d').drawImage(canvas, 0, 0);
+
+            canvas.width = nuevoAncho;
+            canvas.height = nuevoAlto;
+            anchoLogico = w;
+            altoLogico = h;
+
+            // A partir de aquí se dibuja en píxeles CSS; el contexto escala a píxeles físicos
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            limpiarLienzo();
+            ctx.drawImage(copia, 0, 0, copia.width, copia.height, 0, 0, w, h);
+        }
+
+        function limpiarLienzo() {
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.fillStyle = COLOR_PAPEL;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        }
+
+        // ------------------------------------------------------------------
+        // 5. CATÁLOGO Y FICHA
+        // ------------------------------------------------------------------
+        function renderizarCatalogo() {
+            containerRecetas.innerHTML = '';
+            recetasSostenibles.forEach((receta) => {
+                const card = document.createElement('div');
+                card.className = `recipe-card ${receta.id === materialActual.id ? 'selected' : ''}`;
+                card.onclick = () => seleccionarMaterial(receta);
+
+                card.innerHTML = `
+                    <h3>${receta.nombre}</h3>
+                    <p><strong>Aglutinante:</strong> ${receta.aglutinante}</p>
+                    <div style="width:100%; height:8px; background-color:${receta.colorHEX}; border-radius:4px; margin-top:8px;"></div>
+                `;
+                containerRecetas.appendChild(card);
+            });
+        }
+
+        function seleccionarMaterial(receta) {
+            materialActual = receta;
+            renderizarCatalogo();
+            actualizarFichaInformativa();
+        }
+
+        function actualizarFichaInformativa() {
+            containerInfo.innerHTML = `
+                <div class="info-box">
+                    <h4>${materialActual.nombre}</h4>
+                    <p><strong>Origen:</strong> ${materialActual.origen}</p>
+                    <p><strong>Biodegradabilidad:</strong> ${materialActual.biodegradabilidad}</p>
+                </div>
+                <div class="info-box">
+                    <h4>Enfoque ODS 12</h4>
+                    <p>${materialActual.impactoODS}</p>
+                </div>
+            `;
+        }
+
+        // ------------------------------------------------------------------
+        // 6. TRAZO CONTINUO
+        // ------------------------------------------------------------------
+        function obtenerCoordenadas(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left - canvas.clientLeft,
+                y: e.clientY - rect.top - canvas.clientTop
+            };
+        }
+
+        // Más agua/aglutinante => trazo más ancho y translúcido (acuarela).
+        // Más densidad        => más carga de pigmento: trazo algo más grueso y opaco.
+        function calcularEstiloTrazo() {
+            const { ratio, densidad } = leerParametros();
+            const grosor = 1.5 + ratio * 4 + densidad * 0.06;
+            const diluicion = 0.85 / (0.6 + 0.8 * ratio);
+            const carga = 0.6 + densidad / 250;
+            const alfa = limitar(diluicion * carga, 0.08, 0.95);
+            return { grosor, alfa };
+        }
+
+        function iniciarTrazo(e) {
+            dibujoActivo = true;
+            puntosTrazo = [obtenerCoordenadas(e)];
+
+            // Guardamos el estado del lienzo para redibujar el trazo completo en cada movimiento.
+            // Así la opacidad del trazo es uniforme (sin "perlas" en las uniones de segmentos).
+            instantanea.width = canvas.width;
+            instantanea.height = canvas.height;
+            ctxInstantanea.drawImage(canvas, 0, 0);
+
+            dibujarTrazo();
+        }
+
+        function continuarTrazo(e) {
+            if (!dibujoActivo) return;
+            const p = obtenerCoordenadas(e);
+            const ultimo = puntosTrazo[puntosTrazo.length - 1];
+            // Ignora micro-movimientos para obtener una curva más limpia
+            if (Math.hypot(p.x - ultimo.x, p.y - ultimo.y) < 1.2) return;
+            puntosTrazo.push(p);
+            dibujarTrazo();
+        }
+
+        function terminarTrazo() {
+            dibujoActivo = false;
+            puntosTrazo = [];
+        }
+
+        function dibujarTrazo() {
+            // Restaurar el lienzo tal como estaba al iniciar el trazo
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.drawImage(instantanea, 0, 0);
+            ctx.restore();
+
+            const { grosor, alfa } = calcularEstiloTrazo();
+            ctx.strokeStyle = rgba(materialActual.colorRGB, alfa);
+            ctx.lineWidth = grosor;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const pts = puntosTrazo;
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+
+            if (pts.length === 1) {
+                ctx.lineTo(pts[0].x + 0.01, pts[0].y);   // un toque simple deja una gota redonda
+            } else {
+                // Suavizado: curvas cuadráticas con los puntos medios como anclas
+                for (let i = 1; i < pts.length - 1; i++) {
+                    const medioX = (pts[i].x + pts[i + 1].x) / 2;
+                    const medioY = (pts[i].y + pts[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(pts[i].x, pts[i].y, medioX, medioY);
+                }
+                const fin = pts[pts.length - 1];
+                ctx.lineTo(fin.x, fin.y);
+            }
+            ctx.stroke();
+        }
+
+        // ------------------------------------------------------------------
+        // 7. FRACTAL ORGÁNICO ESTOCÁSTICO (The Nature of Code)
+        // ------------------------------------------------------------------
+        function generarEstructuraProcedural() {
+            const { ratio, densidad } = leerParametros();
+
+            const cfg = {
+                color: materialActual.colorRGB,
+                // Densidad -> profundidad de recursión (6 a 11 niveles)
+                profundidadTotal: Math.round(6 + ((densidad - 10) / 90) * 5),
+                // Proporción -> factor de escala de cada rama hija (≈0.63 a 0.78)
+                factorEscala: 0.62 + ((ratio - 0.1) / 1.9) * 0.16,
+                // Grosor del tronco: crece con la proporción y la densidad
+                grosorTronco: 2 + ratio * 2.2 + densidad * 0.02
+            };
+
+            const xInicio = anchoLogico * aleatorio(0.35, 0.65);
+            const yInicio = altoLogico - 6;
+            const longitudTronco = altoLogico * 0.22;
+            const anguloInicio = -Math.PI / 2 + aleatorio(-0.08, 0.08);
+
+            ctx.save();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ramificar(xInicio, yInicio, longitudTronco, anguloInicio, cfg.profundidadTotal, cfg);
+            ctx.restore();
+        }
+
+        function ramificar(x, y, longitud, angulo, profundidad, cfg) {
+            if (profundidad <= 0) return;
+
+            // t = 1 en el tronco, tiende a 0 en las puntas
+            const t = profundidad / cfg.profundidadTotal;
+
+            // Rama ligeramente curva y de largo variable (jitter)
+            const largo = longitud * aleatorio(0.88, 1.12);
+            const xFin = x + Math.cos(angulo) * largo;
+            const yFin = y + Math.sin(angulo) * largo;
+            const curvatura = aleatorio(-0.5, 0.5) * largo * 0.25;
+            const xCtrl = (x + xFin) / 2 - Math.sin(angulo) * curvatura;
+            const yCtrl = (y + yFin) / 2 + Math.cos(angulo) * curvatura;
+
+            // Grosor proporcional a la profundidad; opacidad que se diluye hacia las puntas
+            ctx.lineWidth = Math.max(0.5, cfg.grosorTronco * t);
+            ctx.strokeStyle = rgba(cfg.color, 0.35 + 0.55 * t);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(xCtrl, yCtrl, xFin, yFin);
+            ctx.stroke();
+
+            // Extremos: pequeñas "hojas" o esporas
+            if (profundidad === 1) {
+                ctx.fillStyle = rgba(cfg.color, 0.4);
+                ctx.beginPath();
+                ctx.arc(xFin, yFin, aleatorio(1, 2.6), 0, Math.PI * 2);
+                ctx.fill();
+                return;
+            }
+
+            // Poda natural: algunas ramas intermedias dejan de crecer
+            if (profundidad < cfg.profundidadTotal - 2 && Math.random() < 0.07) return;
+
+            // Normalmente 2 ramas hijas; a veces 3
+            const numHijas = Math.random() < 0.18 ? 3 : 2;
+            const abertura = aleatorio(0.38, 0.58);
+
+            for (let i = 0; i < numHijas; i++) {
+                const direccion = numHijas === 2 ? (i === 0 ? -1 : 1) : i - 1;
+
+                // Tropismo suave: las ramas tienden a buscar la vertical (luz)
+                const anguloBase = angulo + (-Math.PI / 2 - angulo) * 0.08;
+                // Jitter estocástico en el ángulo de bifurcación
+                const anguloHija = anguloBase + direccion * abertura + aleatorio(-0.18, 0.18);
+                const longitudHija = largo * cfg.factorEscala * aleatorio(0.9, 1.1);
+
+                ramificar(xFin, yFin, longitudHija, anguloHija, profundidad - 1, cfg);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // 8. EXPORTAR
+        // ------------------------------------------------------------------
+        function guardarLienzoPNG() {
+            const enlace = document.createElement('a');
+            enlace.download = `recetario-${materialActual.id}.png`;
+            enlace.href = canvas.toDataURL('image/png');   // exporta a resolución física completa
+            enlace.click();
+        }
+
+        // ------------------------------------------------------------------
+        // 9. EVENTOS E INICIALIZACIÓN
+        // ------------------------------------------------------------------
+        function asociarEventos() {
+            // Ratón
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                iniciarTrazo(e);
+            });
+            canvas.addEventListener('mousemove', continuarTrazo);
+            canvas.addEventListener('mouseleave', terminarTrazo);
+            window.addEventListener('mouseup', terminarTrazo);
+
+            // Táctil (preventDefault + touch-action: none evitan el scroll accidental)
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                iniciarTrazo(e.touches[0]);
+            }, { passive: false });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                continuarTrazo(e.touches[0]);
+            }, { passive: false });
+            canvas.addEventListener('touchend', terminarTrazo);
+            canvas.addEventListener('touchcancel', terminarTrazo);
+
+            // Botones
+            btnClear.addEventListener('click', limpiarLienzo);
+            btnPattern.addEventListener('click', generarEstructuraProcedural);
+            btnSave.addEventListener('click', guardarLienzoPNG);
+
+            // Lecturas de los sliders
+            sliderRatio.addEventListener('input', () => { outRatio.textContent = parseFloat(sliderRatio.value).toFixed(1); });
+            sliderDensity.addEventListener('input', () => { outDensity.textContent = sliderDensity.value; });
+
+            // Reajuste de resolución al cambiar tamaño, orientación o zoom
+            if ('ResizeObserver' in window) {
+                new ResizeObserver(ajustarCanvasHD).observe(canvas);
+            }
+            window.addEventListener('resize', ajustarCanvasHD);
+        }
+
+        function inicializar() {
+            renderizarCatalogo();
+            actualizarFichaInformativa();
+            ajustarCanvasHD();
+            limpiarLienzo();
+            asociarEventos();
+        }
+
+        window.addEventListener('load', inicializar);
+    </script>
+</body>
+</html>
